@@ -1,0 +1,51 @@
+
+<?php
+    require 'conn.php';
+
+$video_name = $_POST['video_name'];
+$location = $_FILES['location']['name'];
+$target_dir = "video/";
+    $target_file = $target_dir .basename($_FILES["location"]["name"]);
+    $uploadOk = 1;
+    $imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+
+    if (move_uploaded_file($_FILES["location"]["tmp_name"], $target_file)) {
+        echo "The file ".basename( $_FILES["location"]["name"],".mp4"); " has been uploaded.";
+    } else {
+        echo "Sorry, there was an error uploading your file.";
+    }
+
+    $image=basename( $_FILES["location"]["name"],".mp4"); // used to store the filename in a variable
+/*img end code*/
+$checkuser = "SELECT
+	* 
+FROM
+	video 
+WHERE
+	video_name = '$video_name'";
+$checkquery = mysqli_query($conn , $checkuser);
+
+if (mysqli_num_rows($checkquery) > 0) {
+    // code...
+    $response['status'] = "401";
+    $response['message'] = "Video Name Exist";
+} else {
+
+    $sql = "INSERT INTO video (video_name,location) VALUES ('$video_name','$location')";
+
+    if ($result = mysqli_query($conn , $sql)) {
+        $response['status']= "200";
+        $response['message'] = "Data Insert Successfully";
+    }else{
+        $response['status'] = "400";
+        $response['message'] = "Failed";
+    }
+
+}
+
+//echo "Returned rows are: " . mysqli_num_rows($checkquery);
+//echo '<pre>'.print_r( $response,true).'<br>';die;
+echo json_encode($response);
+
+
+?>
